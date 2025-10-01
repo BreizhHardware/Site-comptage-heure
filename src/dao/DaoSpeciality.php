@@ -30,4 +30,15 @@ class DaoSpeciality {
         return $speciality;
     }
 
+    public function getAllSpecialities() {
+        $statement = $this->db->prepare("SELECT id, type FROM speciality ORDER BY id ASC");
+        $statement->execute();
+        $results = $statement->fetchAll(PDO::FETCH_ASSOC);
+        $specialities = [];
+        foreach ($results as $row) {
+            $specialities[] = new Speciality($row['id'], $row['type']);
+        }
+        return $specialities;
+    }
+
 };

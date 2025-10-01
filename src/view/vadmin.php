@@ -1,4 +1,7 @@
 <?php require_once "header.php"; ?>
+<?php if (isset($_SESSION['user']) && $_SESSION['user']->getIsAdmin()) { ?>
+    <a href="?action=adduser" class="btn btn-primary" style="margin-bottom: 20px;">Créer un utilisateur</a>
+<?php } ?>
 <div style="margin: 2%;">
 
 <h3 class="" style="">Consulter un historique</h3>

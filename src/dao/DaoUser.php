@@ -49,4 +49,16 @@ class DaoUser {
         }
         return $users;
     }
+    public function addUser($name, $surname, $cycle, $mail, $password, $id_speciality, $is_admin) {
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $statement = $this->db->prepare("INSERT INTO users (name, surname, cycle, mail, password, id_speciality, is_admin) VALUES (:name, :surname, :cycle, :mail, :password, :id_speciality, :is_admin)");
+        $statement->bindParam(":name", $name);
+        $statement->bindParam(":surname", $surname);
+        $statement->bindParam(":cycle", $cycle);
+        $statement->bindParam(":mail", $mail);
+        $statement->bindParam(":password", $hashedPassword);
+        $statement->bindParam(":id_speciality", $id_speciality);
+        $statement->bindParam(":is_admin", $is_admin, PDO::PARAM_BOOL);
+        return $statement->execute();
+    }
 };

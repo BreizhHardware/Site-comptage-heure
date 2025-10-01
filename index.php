@@ -42,3 +42,8 @@ elseif($method == "POST"){
     if($uri == "/admin/refuse") $cntrlApp->getRefuseResult();
     if($uri == "/admin/historique") $cntrlApp->getSpecificHistoric();
 }
+
+if (isset($_GET['action']) && $_GET['action'] === 'adduser') {
+    require_once 'src/appli/cntrlAddUser.php';
+    exit();
+}
