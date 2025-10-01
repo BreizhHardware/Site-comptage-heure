@@ -12,7 +12,13 @@ class cntrlLogin {
         $utils = new Utils();
         $mail       = $_POST['mail'];
         $password   = $_POST['password'];
-        $daoUser    = new DaoUser(DBHOST, DBNAME, PORT, USER, PASS);
+        $daoUser    = new DaoUser(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
 
         $id = $daoUser->connectUser($mail, $password);
 

@@ -2,16 +2,15 @@
 
 const PATH_VIEW = "src/view/";
 const PATH_CSS = "ressources/css/";
-const DBHOST = "localhost";
-const DBNAME = "bdehours";
-const PORT = 5432;
-const USER = "postgres";
-const PASS = "Isen44N";
+$DBHOST = getenv('DBHOST') ?: 'localhost';
+$DBNAME = getenv('DBNAME') ?: 'bdehours';
+$PORT   = getenv('DBPORT') ?: 5432;
+$USER   = getenv('DBUSER') ?: 'postgres';
+$PASS   = getenv('DBPASS') ?: 'Isen44N';
 
 require_once "src/dao/DaoUser.php";
 require_once "src/metier/User.php";
 require_once "src/dao/DaoSpeciality.php";
-
 
 class Utils {
 
@@ -37,7 +36,7 @@ class Utils {
                         <i class="bi-exclamation-octagon-fill"></i>
                         <strong class="mx-2">Erreur!</strong>'. $needle . '
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>  
+                    </div>
                 </div>
         ';
     }
@@ -66,8 +65,9 @@ class Utils {
     }
 
     public function constructSession($id){
-        $DaoUser = new DaoUser(DBHOST, DBNAME, PORT, USER, PASS);
-        $DaoSpeciality = new DaoSpeciality(DBHOST, DBNAME, PORT, USER, PASS);
+        global $DBHOST, $DBNAME, $PORT, $USER, $PASS;
+        $DaoUser = new DaoUser($DBHOST, $DBNAME, $PORT, $USER, $PASS);
+        $DaoSpeciality = new DaoSpeciality($DBHOST, $DBNAME, $PORT, $USER, $PASS);
         $result = $DaoUser->getUserById($id);
         $user = new User($result['id'], $result['name'], $result['surname'], $result['cycle'], $result['mail'], $result['is_admin']);
         if(session_status() === PHP_SESSION_NONE){
@@ -83,10 +83,13 @@ class Utils {
         require PATH_VIEW . "vaccueil.php";
     }
     public function convertHoursToDecimal($time){
-            $sep = explode(":", $time);
-            $hours = $sep[0];
-            $minutes = round($sep[1] / 60, 2);
-            return (float) ($hours + $minutes);
+        $sep = explode(":", $time);
+        if (count($sep) !== 2 || !is_numeric($sep[1])) {
+            throw new InvalidArgumentException("Invalid time format. Expected HH:MM.");
+        }
+        $hours = $sep[0];
+        $minutes = round($sep[1] / 60, 2);
+        return (float) ($hours + $minutes);
     }
     function convertDecimalToHours($dec)
     {
@@ -106,7 +109,4 @@ class Utils {
         // return the time formatted HH\hMM
         return (string) ($hours)."h".($minutes);
     }
-    
-
-
 };

@@ -11,7 +11,13 @@ class cntrlApp {
         if(!isset($utils)){
             $utils = new Utils();
         }
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         if(session_status() == PHP_SESSION_NONE){
             session_start();
         }
@@ -30,7 +36,13 @@ class cntrlApp {
             $utils = new Utils();
         }
     
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         if(session_status() == PHP_SESSION_NONE){
             session_start();
         }
@@ -47,7 +59,13 @@ class cntrlApp {
         if(!isset($utils)){
             $utils = new Utils();
         }
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         $date = $_POST["date"];
         $duration = $_POST["duration"];
         $description = $_POST["description"];
@@ -66,8 +84,20 @@ class cntrlApp {
         if(!isset($utils)){
             $utils = new Utils();
         }
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
-        $DaoUser = new DaoUser(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
+        $DaoUser = new DaoUser(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         if(session_status() == PHP_SESSION_NONE){
             session_start();
         }
@@ -86,8 +116,20 @@ class cntrlApp {
         if(!isset($utils)){
             $utils = new Utils();
         }
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
-        $DaoUser = new DaoUser(DBHOST, DBNAME, PORT, USER, PASS);	
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
+        $DaoUser = new DaoUser(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         if(session_status() == PHP_SESSION_NONE){
             session_start();
         }
@@ -118,7 +160,13 @@ class cntrlApp {
         if(!isset($utils)){
             $utils = new Utils();
         }
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         $idDelete = $_POST["idDelete"];
         $DaoTimeslot->deleteTimeslotById($idDelete);
 
@@ -134,7 +182,13 @@ class cntrlApp {
             session_start();
         }
         $idUser = $_SESSION["user"]->getId();
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         $DaoTimeslot->validateTimeslot($idValidate, $idUser);
         $utils->echoSuccess("Horaire validé");
         $this->getAdminPage();
@@ -149,7 +203,13 @@ class cntrlApp {
             session_start();
         }
         $idUser = $_SESSION["user"]->getId();
-        $DaoTimeslot = new DaoTimeslot(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoTimeslot = new DaoTimeslot(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         $DaoTimeslot->refuseTimeslot($idRefuse, $idUser);
         $utils->echoSuccess("Horaire refusé");
         $this->getAdminPage();

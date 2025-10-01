@@ -3,6 +3,12 @@ services:
     image: ghcr.io/nirij3m/site-comptage-heure:latest
     ports:
       - "80:80"
+    environment:
+      DBHOST: db
+      DBPORT: 5432
+      DBNAME: bdehours
+      DBUSER: postgres
+      DBPASSWORD: Isen44N
     volumes:
       - ./:/var/www/html
     depends_on:

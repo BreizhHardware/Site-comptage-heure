@@ -13,7 +13,13 @@ class User {
     private bool $isAdmin;
 
     public function __construct(int $id, string $name, string $surname, string $cycle, string $mail, bool $isAdmin = NULL){
-        $DaoSpeciality = new DaoSpeciality(DBHOST, DBNAME, PORT, USER, PASS);
+        $DaoSpeciality = new DaoSpeciality(
+            getenv('DBHOST') ?: 'localhost',
+            getenv('DBNAME') ?: 'bdehours',
+            getenv('DBPORT') ?: 5432,
+            getenv('DBUSER') ?: 'postgres',
+            getenv('DBPASS') ?: 'Isen44N'
+        );
         $this->id = $id;
         $this->name = $name;
         $this->surname = $surname;
