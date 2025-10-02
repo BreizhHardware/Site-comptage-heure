@@ -74,6 +74,7 @@
 
         <h3 class="" style="text-align: left; margin-top: 2%;">Votre historique complet</h3>
         <hr>
+        <a href="/changepassword" style="text-decoration: none;"><button type="button" class="btn btn-outline-warning">Changer mon mot de passe</button></a>
         <a href="/historique" target="_blank" style="text-decoration: none;"><button type="button" class="btn btn-outline-secondary">Consulter l'historique</button></a>
 
 
@@ -81,4 +82,4 @@
     </div>
 
 
-</body> 
+</body>

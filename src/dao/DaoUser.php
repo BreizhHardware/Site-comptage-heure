@@ -34,7 +34,7 @@ class DaoUser {
         return $id;
     }
     public function getUserById($id){
-        $statement = $this->db->prepare("SELECT id, name, surname, cycle, mail, id_speciality, is_admin FROM users WHERE id = :id");
+        $statement = $this->db->prepare("SELECT id, name, surname, cycle, mail, id_speciality, is_admin, password FROM users WHERE id = :id");
         $statement->bindParam(":id", $id);
         $statement->execute();
         $user = $statement->fetch(PDO::FETCH_ASSOC);
@@ -60,5 +60,10 @@ class DaoUser {
         $statement->bindParam(":id_speciality", $id_speciality);
         $statement->bindParam(":is_admin", $is_admin, PDO::PARAM_BOOL);
         return $statement->execute();
+    }
+    public function updatePassword($id, $hashedPassword) {
+        $sql = "UPDATE users SET password = :password WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['password' => $hashedPassword, 'id' => $id]);
     }
 };

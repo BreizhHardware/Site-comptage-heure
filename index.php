@@ -31,7 +31,7 @@ if($method == "GET"){
     if($uri == "/historique")  $cntrlApp->getHistorique();
     if($uri == "/admin")  $cntrlApp->getAdminPage();
     if($uri == "/debug") $DaoTimeslot->getTimeslotsByIdUser(1);
-    
+    if($uri == "/changepassword") require_once "src/appli/cntrlChangePassword.php";
 
 }
 elseif($method == "POST"){
@@ -41,6 +41,7 @@ elseif($method == "POST"){
     if($uri == "/admin/validate") $cntrlApp->getValidateResult();
     if($uri == "/admin/refuse") $cntrlApp->getRefuseResult();
     if($uri == "/admin/historique") $cntrlApp->getSpecificHistoric();
+    if($uri == "/changepassword") require_once "src/appli/cntrlChangePassword.php";
 }
 
 if (isset($_GET['action']) && $_GET['action'] === 'adduser') {
