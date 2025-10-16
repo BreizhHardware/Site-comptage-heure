@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BDE</title>
+    <title>Comptage d'heure</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
     <script src="https://kit.fontawesome.com/5b8b37978c.js" crossorigin="anonymous"></script>
@@ -35,7 +35,7 @@
       <!-- Navbar brand -->
       <a class="navbar-brand mt-2 mt-lg-0" href="#">
         <img
-          src="/assets/img/logo.jpg"
+          src="/assets/img/logo.png"
           height="50"
           alt="MDB Logo"
           loading="lazy"
