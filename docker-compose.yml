@@ -1,5 +1,5 @@
 services:
-  app:
+  site-comptage-heure:
     image: ghcr.io/breizhhardware/site-comptage-heure:latest
     ports:
       - '3000:3000'
