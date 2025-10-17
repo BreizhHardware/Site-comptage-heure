@@ -131,25 +131,18 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 
 ### Avec Docker
 
-1. Build l'image :
-
+1Run le container :
    ```bash
-   docker build -t comptage-heures .
+   docker compose up -d
    ```
-
-2. Run le container :
-   ```bash
-   docker run -p 3000:3000 comptage-heures
-   ```
-   
-3. Créer un Super Administrateur à l'intérieur du container :
+Créer un Super Administrateur à l'intérieur du container :
    ```bash
    docker exec -it <container_id> sh
    ```
-    Puis exécuter (pensez à modifier le nom d'utilisateur et le mot de passe si nécessaire) :
-    ```bash
-    node scripts/create-super-admin.js
-    ```
+   Puis exécuter (pensez à modifier le nom d'utilisateur et le mot de passe si nécessaire) :
+   ```bash
+   node scripts/create-super-admin.js
+   ```
 
 ## Contribution
 
