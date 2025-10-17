@@ -69,6 +69,9 @@ export default function AdminPage() {
     id: string;
     name: string;
   } | null>(null);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [changeNewPassword, setChangeNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -185,6 +188,8 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: string) => {
+    // Reject the hour entry then delete
+    await handleValidate(id, 'REJECTED');
     await fetch(`/api/hours/${id}`, {
       method: 'DELETE',
     });
@@ -230,6 +235,28 @@ export default function AdminPage() {
     setDialogOpen(false);
     setSelectedUser(null);
     fetchHours();
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (changeNewPassword !== confirmPassword) {
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
+    }
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword: changeNewPassword }),
+    });
+    if (res.ok) {
+      toast.success('Mot de passe changé avec succès');
+      setCurrentPassword('');
+      setChangeNewPassword('');
+      setConfirmPassword('');
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors du changement de mot de passe');
+    }
   };
 
   if (status === 'loading') return <div>Chargement...</div>;
@@ -347,7 +374,7 @@ export default function AdminPage() {
                           variant="destructive"
                           disabled={hour.userId === session?.user?.id}
                         >
-                          Supprimer
+                          Rejeter
                         </Button>
                       </>
                     )}
@@ -399,6 +426,48 @@ export default function AdminPage() {
               </TableBody>
             </Table>
           </div>
+        </CardContent>
+      </Card>
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Changer mot de passe</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="changeNewPassword">Nouveau mot de passe</Label>
+              <Input
+                id="changeNewPassword"
+                type="password"
+                value={changeNewPassword}
+                onChange={(e) => setChangeNewPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirmPassword">
+                Confirmer nouveau mot de passe
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit">Changer mot de passe</Button>
+          </form>
         </CardContent>
       </Card>
       {isSuperAdmin && (

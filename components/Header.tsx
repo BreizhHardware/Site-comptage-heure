@@ -41,10 +41,7 @@ export default function Header() {
             <span className="text-gray-900 dark:text-white">
               {session.user.email} ({session.user.role})
             </span>
-            <Button
-                onClick={() => signOut()}
-                variant="destructive"
-            >
+            <Button onClick={() => signOut()} variant="destructive">
               Déconnexion
             </Button>
           </div>

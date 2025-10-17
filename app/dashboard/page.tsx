@@ -22,6 +22,7 @@ import {
 } from '../../components/ui/card';
 import { DatePicker } from '../../components/ui/date-picker';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 
 interface Hour {
   id: number;
@@ -41,6 +42,9 @@ export default function DashboardPage() {
   const [reason, setReason] = useState('');
   const [hoursInput, setHoursInput] = useState('');
   const [minutesInput, setMinutesInput] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -72,7 +76,11 @@ export default function DashboardPage() {
     const res = await fetch('/api/hours', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: dateString, duration: totalMinutes, reason }),
+      body: JSON.stringify({
+        date: dateString,
+        duration: totalMinutes,
+        reason,
+      }),
     });
     if (res.ok) {
       setDate(undefined);
@@ -80,6 +88,9 @@ export default function DashboardPage() {
       setMinutesInput('');
       setReason('');
       fetchHours();
+      toast.success('Heure ajoutée avec succès');
+    } else {
+      toast.error("Erreur lors de l'ajout de l'heure");
     }
   };
 
@@ -90,6 +101,28 @@ export default function DashboardPage() {
       body: JSON.stringify({ status }),
     });
     fetchHours();
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
+    }
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+    if (res.ok) {
+      toast.success('Mot de passe changé avec succès');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors du changement de mot de passe');
+    }
   };
 
   if (status === 'loading') return <div>Chargement...</div>;
@@ -167,7 +200,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
-      <Card>
+      <Card className="mb-4">
         <CardHeader>
           <CardTitle>Liste des heures</CardTitle>
         </CardHeader>
@@ -215,6 +248,50 @@ export default function DashboardPage() {
           </Table>
         </CardContent>
       </Card>
+      {isMember && (
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle>Changer mot de passe</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleChangePassword} className="space-y-4">
+              <div>
+                <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">
+                  Confirmer nouveau mot de passe
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit">Changer mot de passe</Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
       <div className="mt-4">
         <h2 className="text-xl font-bold">Totaux</h2>
         <div className="flex space-x-4">
