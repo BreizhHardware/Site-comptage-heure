@@ -1,0 +1,41 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } },
+) {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== 'SUPER_ADMIN') {
+    return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
+  }
+
+  const userId = params.id;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { hours: true },
+  });
+
+  if (!user) {
+    return NextResponse.json(
+      { error: 'Utilisateur non trouvé' },
+      { status: 404 },
+    );
+  }
+
+  if (user.hours.length > 0) {
+    return NextResponse.json(
+      { error: 'Impossible de supprimer un utilisateur avec des heures' },
+      { status: 400 },
+    );
+  }
+
+  await prisma.user.delete({
+    where: { id: userId },
+  });
+
+  return NextResponse.json({ message: 'Utilisateur supprimé' });
+}

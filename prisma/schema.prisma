@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       String   @id
+  email    String   @unique
+  password String
+  role     Role     @default(MEMBER)
+  hours    Hour[]
+  firstName String?
+  lastName String?
+}
+
+model Hour {
+  id          String   @id
+  date        DateTime
+  duration    Int      // en minutes
+  reason      String
+  status      Status   @default(PENDING)
+  validatedBy String?  // ID de l'admin
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+}
+
+model ClubSettings {
+  id    String @id @default("settings")
+  name  String
+  logo  String  // Chemin vers l'image dans /public
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+  SUPER_ADMIN  // Rôle spécial pour le premier compte
+}
+
+enum Status {
+  PENDING
+  VALIDATED
+  REJECTED
+}
