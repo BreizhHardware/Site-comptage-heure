@@ -33,17 +33,20 @@ Une application web moderne pour la gestion des heures travaillées dans un club
 ## Installation
 
 1. **Cloner le repository**
+
    ```bash
    git clone https://github.com/breizhhardware/site-comptage-heure.git
    cd site-comptage-heure
    ```
 
 2. **Installer les dépendances**
+
    ```bash
    pnpm install
    ```
 
 3. **Configuration de la base de données**
+
    ```bash
    # Appliquer le schéma Prisma
    npx prisma db push
@@ -53,8 +56,9 @@ Une application web moderne pour la gestion des heures travaillées dans un club
    ```
 
 4. **Variables d'environnement**
-   
+
    Créer un fichier `.env.local` à la racine :
+
    ```env
    NEXTAUTH_SECRET=votre-secret-très-long-et-sécurisé
    NEXTAUTH_URL=http://localhost:3000
@@ -68,6 +72,7 @@ Une application web moderne pour la gestion des heures travaillées dans un club
 ## Utilisation
 
 ### Démarrage en développement
+
 ```bash
 pnpm dev
 ```
@@ -75,6 +80,7 @@ pnpm dev
 Ouvrir [http://localhost:3000](http://localhost:3000)
 
 ### Première connexion
+
 - Utilisez les identifiants du Super Administrateur créé
 - Configurez le nom et le logo du club dans l'admin
 - Créez des comptes pour les administrateurs et membres
@@ -126,6 +132,7 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 ### Avec Docker
 
 1. Build l'image :
+
    ```bash
    docker build -t comptage-heures .
    ```
@@ -134,6 +141,15 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
    ```bash
    docker run -p 3000:3000 comptage-heures
    ```
+   
+3. Créer un Super Administrateur à l'intérieur du container :
+   ```bash
+   docker exec -it <container_id> sh
+   ```
+    Puis exécuter (pensez à modifier le nom d'utilisateur et le mot de passe si nécessaire) :
+    ```bash
+    node scripts/create-super-admin.js
+    ```
 
 ## Contribution
 

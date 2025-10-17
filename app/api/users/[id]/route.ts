@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { authOptions } from '../../../../lib/auth';
+import { prisma } from '../../../../lib/prisma';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
   if (!session || session.user.role !== 'SUPER_ADMIN') {
     return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
   }
 
-  const userId = params.id;
+  const { id } = await params;
 
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id },
     include: { hours: true },
   });
 
@@ -34,7 +34,7 @@ export async function DELETE(
   }
 
   await prisma.user.delete({
-    where: { id: userId },
+    where: { id },
   });
 
   return NextResponse.json({ message: 'Utilisateur supprimé' });

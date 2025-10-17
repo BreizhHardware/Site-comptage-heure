@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 
 const prisma = new PrismaClient();
 
@@ -12,6 +13,7 @@ async function main() {
       email: 'test@test.fr',
       password: hashedPassword,
       role: 'SUPER_ADMIN',
+      id: uuidv4(), // Ajout d'un identifiant unique
     },
   });
   console.log('Super admin created');

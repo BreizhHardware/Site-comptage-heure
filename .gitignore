@@ -44,13 +44,10 @@ next-env.d.ts
 .idea/*
 .idea
 
-INDICATIONS_POUR_LLMS.md
 public/uploads
 public/uploads/*
 prisma/dev.db
 
-pnpm-lock.yaml
 .vscode/
 .vscode/*
 .vscode
-

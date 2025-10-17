@@ -3,9 +3,9 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
 import {
   Table,
   TableBody,
@@ -13,8 +13,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from '../../components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -22,9 +22,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '../../components/ui/dialog';
 import { toast } from 'sonner';
-import { DatePicker } from '@/components/ui/date-picker';
+import { DatePicker } from '../../components/ui/date-picker';
 import { format } from 'date-fns';
 
 interface Hour {
@@ -94,7 +94,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleValidate = async (id: number, status: string) => {
+  const handleValidate = async (id: string, status: string) => {
     await fetch(`/api/hours/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -179,7 +179,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     await fetch(`/api/hours/${id}`, {
       method: 'DELETE',
     });
@@ -330,14 +330,14 @@ export default function AdminPage() {
                         <Button
                           onClick={() => handleValidate(hour.id, 'VALIDATED')}
                           className="mr-2"
-                          disabled={hour.userId === session.user.id}
+                          disabled={hour.userId === session?.user?.id}
                         >
                           Valider
                         </Button>
                         <Button
                           onClick={() => handleDelete(hour.id)}
                           variant="destructive"
-                          disabled={hour.userId === session.user.id}
+                          disabled={hour.userId === session?.user?.id}
                         >
                           Supprimer
                         </Button>
