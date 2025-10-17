@@ -611,7 +611,9 @@ export default function AdminPage() {
                   checked={forceDelete}
                   onChange={(e) => setForceDelete(e.target.checked)}
                 />
-                <Label htmlFor="force">Forcer la suppression même si l'utilisateur a des heures</Label>
+                <Label htmlFor="force">
+                  Forcer la suppression même si l'utilisateur a des heures
+                </Label>
               </div>
             </DialogDescription>
             <DialogFooter>
@@ -630,7 +632,8 @@ export default function AdminPage() {
               <DialogTitle>Confirmation de suppression forcée</DialogTitle>
             </DialogHeader>
             <DialogDescription>
-              Cette action supprimera l'utilisateur sans tenir compte de ses heures. Êtes-vous sûr ?
+              Cette action supprimera l'utilisateur sans tenir compte de ses
+              heures. Êtes-vous sûr ?
             </DialogDescription>
             <DialogFooter>
               <Button onClick={() => setShowForceModal(false)}>Annuler</Button>
