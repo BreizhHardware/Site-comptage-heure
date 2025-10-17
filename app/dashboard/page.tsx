@@ -150,6 +150,23 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
+      <div className="mb-4">
+        <h2 className="text-xl font-bold">Totaux</h2>
+        <div className="flex space-x-4">
+          <div>
+            <h3 className="font-semibold">En attente</h3>
+            <p>{formatHours(totalPending)}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Validées</h3>
+            <p>{formatHours(totalValidated)}</p>
+          </div>
+          <div>
+            <h3 className="font-semibold">Rejetées</h3>
+            <p>{formatHours(totalRejected)}</p>
+          </div>
+        </div>
+      </div>
       {isMember && (
         <Card className="mb-4">
           <CardHeader>
@@ -292,23 +309,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
-      <div className="mt-4">
-        <h2 className="text-xl font-bold">Totaux</h2>
-        <div className="flex space-x-4">
-          <div>
-            <h3 className="font-semibold">En attente</h3>
-            <p>{formatHours(totalPending)}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Validées</h3>
-            <p>{formatHours(totalValidated)}</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Rejetées</h3>
-            <p>{formatHours(totalRejected)}</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
