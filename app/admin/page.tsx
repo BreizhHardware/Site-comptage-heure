@@ -72,6 +72,8 @@ export default function AdminPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [changeNewPassword, setChangeNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [forceDelete, setForceDelete] = useState(false);
+  const [showForceModal, setShowForceModal] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -231,10 +233,41 @@ export default function AdminPage() {
 
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
-    await fetch(`/api/users/${selectedUser.id}`, { method: 'DELETE' });
-    setDialogOpen(false);
-    setSelectedUser(null);
-    fetchHours();
+    const res = await fetch(`/api/users/${selectedUser.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force: forceDelete }),
+    });
+    if (res.ok) {
+      setDialogOpen(false);
+      setSelectedUser(null);
+      fetchHours();
+      toast.success('Utilisateur supprimé');
+    } else if (res.status === 400) {
+      setDialogOpen(false);
+      setShowForceModal(true);
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleForceDelete = async () => {
+    if (!selectedUser) return;
+    const res = await fetch(`/api/users/${selectedUser.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force: true }),
+    });
+    if (res.ok) {
+      setShowForceModal(false);
+      setSelectedUser(null);
+      fetchHours();
+      toast.success('Utilisateur supprimé');
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors de la suppression');
+    }
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -370,7 +403,7 @@ export default function AdminPage() {
                           Valider
                         </Button>
                         <Button
-                          onClick={() => handleDelete(hour.id)}
+                          onClick={() => handleValidate(hour.id, 'REJECTED')}
                           variant="destructive"
                           disabled={hour.userId === session?.user?.id}
                         >
@@ -413,6 +446,7 @@ export default function AdminPage() {
                               id: userId,
                               name: userMap[userId]?.name,
                             });
+                            setForceDelete(false);
                             setDialogOpen(true);
                           }}
                           variant="destructive"
@@ -570,10 +604,37 @@ export default function AdminPage() {
             </DialogHeader>
             <DialogDescription>
               Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+              <div className="flex items-center space-x-2 mt-2">
+                <input
+                  type="checkbox"
+                  id="force"
+                  checked={forceDelete}
+                  onChange={(e) => setForceDelete(e.target.checked)}
+                />
+                <Label htmlFor="force">Forcer la suppression même si l'utilisateur a des heures</Label>
+              </div>
             </DialogDescription>
             <DialogFooter>
               <Button onClick={() => setDialogOpen(false)}>Annuler</Button>
               <Button onClick={handleDeleteUser} variant="destructive">
+                Supprimer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      {selectedUser && showForceModal && (
+        <Dialog open={showForceModal} onOpenChange={setShowForceModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmation de suppression forcée</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              Cette action supprimera l'utilisateur sans tenir compte de ses heures. Êtes-vous sûr ?
+            </DialogDescription>
+            <DialogFooter>
+              <Button onClick={() => setShowForceModal(false)}>Annuler</Button>
+              <Button onClick={handleForceDelete} variant="destructive">
                 Supprimer
               </Button>
             </DialogFooter>
