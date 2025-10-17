@@ -132,17 +132,22 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 ### Avec Docker
 
 1Run le container :
-   ```bash
-   docker compose up -d
-   ```
+
+```bash
+docker compose up -d
+```
+
 Créer un Super Administrateur à l'intérieur du container :
-   ```bash
-   docker exec -it <container_id> sh
-   ```
-   Puis exécuter (pensez à modifier le nom d'utilisateur et le mot de passe si nécessaire) :
-   ```bash
-   node scripts/create-super-admin.js
-   ```
+
+```bash
+docker exec -it <container_id> sh
+```
+
+Puis exécuter (pensez à modifier le nom d'utilisateur et le mot de passe si nécessaire) :
+
+```bash
+node scripts/create-super-admin.js
+```
 
 ## Contribution
 

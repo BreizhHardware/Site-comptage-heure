@@ -69,6 +69,11 @@ export default function AdminPage() {
     id: string;
     name: string;
   } | null>(null);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [changeNewPassword, setChangeNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [forceDelete, setForceDelete] = useState(false);
+  const [showForceModal, setShowForceModal] = useState(false);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -185,6 +190,8 @@ export default function AdminPage() {
   };
 
   const handleDelete = async (id: string) => {
+    // Reject the hour entry then delete
+    await handleValidate(id, 'REJECTED');
     await fetch(`/api/hours/${id}`, {
       method: 'DELETE',
     });
@@ -226,10 +233,63 @@ export default function AdminPage() {
 
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
-    await fetch(`/api/users/${selectedUser.id}`, { method: 'DELETE' });
-    setDialogOpen(false);
-    setSelectedUser(null);
-    fetchHours();
+    const res = await fetch(`/api/users/${selectedUser.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force: forceDelete }),
+    });
+    if (res.ok) {
+      setDialogOpen(false);
+      setSelectedUser(null);
+      fetchHours();
+      toast.success('Utilisateur supprimé');
+    } else if (res.status === 400) {
+      setDialogOpen(false);
+      setShowForceModal(true);
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleForceDelete = async () => {
+    if (!selectedUser) return;
+    const res = await fetch(`/api/users/${selectedUser.id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ force: true }),
+    });
+    if (res.ok) {
+      setShowForceModal(false);
+      setSelectedUser(null);
+      fetchHours();
+      toast.success('Utilisateur supprimé');
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors de la suppression');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (changeNewPassword !== confirmPassword) {
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
+    }
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ currentPassword, newPassword: changeNewPassword }),
+    });
+    if (res.ok) {
+      toast.success('Mot de passe changé avec succès');
+      setCurrentPassword('');
+      setChangeNewPassword('');
+      setConfirmPassword('');
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors du changement de mot de passe');
+    }
   };
 
   if (status === 'loading') return <div>Chargement...</div>;
@@ -268,6 +328,7 @@ export default function AdminPage() {
                   type="number"
                   value={hoursInput}
                   onChange={(e) => setHoursInput(e.target.value)}
+                  min="0"
                   required
                 />
               </div>
@@ -278,6 +339,8 @@ export default function AdminPage() {
                   type="number"
                   value={minutesInput}
                   onChange={(e) => setMinutesInput(e.target.value)}
+                  min="0"
+                  max="59"
                   required
                 />
               </div>
@@ -340,11 +403,11 @@ export default function AdminPage() {
                           Valider
                         </Button>
                         <Button
-                          onClick={() => handleDelete(hour.id)}
+                          onClick={() => handleValidate(hour.id, 'REJECTED')}
                           variant="destructive"
                           disabled={hour.userId === session?.user?.id}
                         >
-                          Supprimer
+                          Rejeter
                         </Button>
                       </>
                     )}
@@ -359,7 +422,7 @@ export default function AdminPage() {
             </div>
           )}
           <div className="mt-4">
-            <h2 className="text-lg font-bold">Totaux par utilisateur</h2>
+            <h5 className="text-lg font-bold">Totaux par utilisateur</h5>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -383,6 +446,7 @@ export default function AdminPage() {
                               id: userId,
                               name: userMap[userId]?.name,
                             });
+                            setForceDelete(false);
                             setDialogOpen(true);
                           }}
                           variant="destructive"
@@ -396,6 +460,48 @@ export default function AdminPage() {
               </TableBody>
             </Table>
           </div>
+        </CardContent>
+      </Card>
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>Changer mot de passe</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleChangePassword} className="space-y-4">
+            <div>
+              <Label htmlFor="currentPassword">Mot de passe actuel</Label>
+              <Input
+                id="currentPassword"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="changeNewPassword">Nouveau mot de passe</Label>
+              <Input
+                id="changeNewPassword"
+                type="password"
+                value={changeNewPassword}
+                onChange={(e) => setChangeNewPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="confirmPassword">
+                Confirmer nouveau mot de passe
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit">Changer mot de passe</Button>
+          </form>
         </CardContent>
       </Card>
       {isSuperAdmin && (
@@ -449,7 +555,7 @@ export default function AdminPage() {
                   id="newRole"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded bg-white text-black dark:bg-stone-800 dark:text-white dark:border-stone-600"
                 >
                   <option value="MEMBER">Membre</option>
                   <option value="ADMIN">Admin</option>
@@ -498,10 +604,37 @@ export default function AdminPage() {
             </DialogHeader>
             <DialogDescription>
               Êtes-vous sûr de vouloir supprimer cet utilisateur ?
+              <div className="flex items-center space-x-2 mt-2">
+                <input
+                  type="checkbox"
+                  id="force"
+                  checked={forceDelete}
+                  onChange={(e) => setForceDelete(e.target.checked)}
+                />
+                <Label htmlFor="force">Forcer la suppression même si l'utilisateur a des heures</Label>
+              </div>
             </DialogDescription>
             <DialogFooter>
               <Button onClick={() => setDialogOpen(false)}>Annuler</Button>
               <Button onClick={handleDeleteUser} variant="destructive">
+                Supprimer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      {selectedUser && showForceModal && (
+        <Dialog open={showForceModal} onOpenChange={setShowForceModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmation de suppression forcée</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              Cette action supprimera l'utilisateur sans tenir compte de ses heures. Êtes-vous sûr ?
+            </DialogDescription>
+            <DialogFooter>
+              <Button onClick={() => setShowForceModal(false)}>Annuler</Button>
+              <Button onClick={handleForceDelete} variant="destructive">
                 Supprimer
               </Button>
             </DialogFooter>

@@ -7,3 +7,4 @@ services:
       - ./data:/app/prisma/data
     environment:
       - NEXTAUTH_SECRET=your_secret_key
+      - NEXTAUTH_URL=http://localhost:3000

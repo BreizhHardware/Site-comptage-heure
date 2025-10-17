@@ -13,6 +13,8 @@ export async function DELETE(
   }
 
   const { id } = await params;
+  const body = await request.json().catch(() => ({}));
+  const { force = false } = body;
 
   const user = await prisma.user.findUnique({
     where: { id },
@@ -26,11 +28,17 @@ export async function DELETE(
     );
   }
 
-  if (user.hours.length > 0) {
+  if (user.hours.length > 0 && !force) {
     return NextResponse.json(
       { error: 'Impossible de supprimer un utilisateur avec des heures' },
       { status: 400 },
     );
+  }
+
+  if (force && user.hours.length > 0) {
+    await prisma.hour.deleteMany({
+      where: { userId: id },
+    });
   }
 
   await prisma.user.delete({
