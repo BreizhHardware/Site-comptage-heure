@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
+import { Button } from './ui/button';
 
 interface Settings {
   name: string;
@@ -40,12 +41,12 @@ export default function Header() {
             <span className="text-gray-900 dark:text-white">
               {session.user.email} ({session.user.role})
             </span>
-            <button
-              onClick={() => signOut()}
-              className="bg-red-500 text-white px-3 py-1 rounded"
+            <Button
+                onClick={() => signOut()}
+                variant="destructive"
             >
               Déconnexion
-            </button>
+            </Button>
           </div>
         )}
       </div>

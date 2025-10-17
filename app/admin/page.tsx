@@ -268,6 +268,7 @@ export default function AdminPage() {
                   type="number"
                   value={hoursInput}
                   onChange={(e) => setHoursInput(e.target.value)}
+                  min="0"
                   required
                 />
               </div>
@@ -278,6 +279,8 @@ export default function AdminPage() {
                   type="number"
                   value={minutesInput}
                   onChange={(e) => setMinutesInput(e.target.value)}
+                  min="0"
+                  max="59"
                   required
                 />
               </div>
@@ -359,7 +362,7 @@ export default function AdminPage() {
             </div>
           )}
           <div className="mt-4">
-            <h2 className="text-lg font-bold">Totaux par utilisateur</h2>
+            <h5 className="text-lg font-bold">Totaux par utilisateur</h5>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -449,7 +452,7 @@ export default function AdminPage() {
                   id="newRole"
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value)}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded bg-white text-black dark:bg-stone-800 dark:text-white dark:border-stone-600"
                 >
                   <option value="MEMBER">Membre</option>
                   <option value="ADMIN">Admin</option>

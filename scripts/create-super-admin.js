@@ -11,6 +11,8 @@ async function main() {
     update: {},
     create: {
       email: 'test@test.fr',
+      firstName: 'Super',
+      lastName: 'Admin',
       password: hashedPassword,
       role: 'SUPER_ADMIN',
       id: uuidv4(), // Ajout d'un identifiant unique

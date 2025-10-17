@@ -20,6 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../../components/ui/card';
+import { DatePicker } from '../../components/ui/date-picker';
+import { format } from 'date-fns';
 
 interface Hour {
   id: number;
@@ -34,7 +36,7 @@ export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [hours, setHours] = useState<Hour[]>([]);
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState<Date>();
   const [duration, setDuration] = useState('');
   const [reason, setReason] = useState('');
   const [hoursInput, setHoursInput] = useState('');
@@ -66,13 +68,14 @@ export default function DashboardPage() {
   const handleAddHour = async (e: React.FormEvent) => {
     e.preventDefault();
     const totalMinutes = parseInt(hoursInput) * 60 + parseInt(minutesInput);
+    const dateString = date ? format(date, 'yyyy-MM-dd') : '';
     const res = await fetch('/api/hours', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date, duration: totalMinutes, reason }),
+      body: JSON.stringify({ date: dateString, duration: totalMinutes, reason }),
     });
     if (res.ok) {
-      setDate('');
+      setDate(undefined);
       setHoursInput('');
       setMinutesInput('');
       setReason('');
@@ -123,13 +126,7 @@ export default function DashboardPage() {
             <form onSubmit={handleAddHour} className="space-y-4">
               <div>
                 <Label htmlFor="date">Date</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                />
+                <DatePicker date={date} setDate={setDate} />
               </div>
               <div className="flex space-x-2">
                 <div>
@@ -139,6 +136,7 @@ export default function DashboardPage() {
                     type="number"
                     value={hoursInput}
                     onChange={(e) => setHoursInput(e.target.value)}
+                    min="0"
                     required
                   />
                 </div>
@@ -149,6 +147,8 @@ export default function DashboardPage() {
                     type="number"
                     value={minutesInput}
                     onChange={(e) => setMinutesInput(e.target.value)}
+                    min="0"
+                    max="59"
                     required
                   />
                 </div>
