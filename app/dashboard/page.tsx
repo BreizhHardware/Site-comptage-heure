@@ -243,14 +243,17 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell>{hour.duration} min</TableCell>
                   <TableCell>{hour.reason}</TableCell>
-                  <TableCell>{hour.status === 'VALIDATED' && hour.validatedBy
-                      ? `Validé par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
+                  <TableCell>
+                    {hour.status === 'VALIDATED' && hour.validatedBy
+                      ? `Validé par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() ||
+                        hour.validatedBy.email
                       : hour.status === 'REJECTED' && hour.validatedBy
-                          ? `Rejeté par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
-                          : hour.status === 'PENDING'
-                              ? 'En attente'
-                              : hour.status
-                  }</TableCell>
+                        ? `Rejeté par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() ||
+                          hour.validatedBy.email
+                        : hour.status === 'PENDING'
+                          ? 'En attente'
+                          : hour.status}
+                  </TableCell>
                   {isAdmin && <TableCell>{hour.user.email}</TableCell>}
                   {isAdmin && (
                     <TableCell>

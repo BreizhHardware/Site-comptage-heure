@@ -22,12 +22,15 @@ export default function Header() {
         {session && (
           <div className="flex items-center space-x-4">
             <span className="text-gray-900 dark:text-white">
-              {session.user.email} ({
-                session.user.role === 'MEMBER' ? 'Membre' :
-                session.user.role === 'ADMIN' ? 'Bureau' :
-                session.user.role === 'SUPER_ADMIN' ? 'Gestionnaire' :
-                session.user.role
-              })
+              {session.user.email} (
+              {session.user.role === 'MEMBER'
+                ? 'Membre'
+                : session.user.role === 'ADMIN'
+                  ? 'Bureau'
+                  : session.user.role === 'SUPER_ADMIN'
+                    ? 'Gestionnaire'
+                    : session.user.role}
+              )
             </span>
             <Button onClick={() => signOut()} variant="destructive">
               Déconnexion

@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
   const buffer = Buffer.from(bytes);
 
   const filename = `${Date.now()}-${file.name}`;
-  const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
+  const filepath = path.join(process.cwd(), 'uploads', filename);
 
   await mkdir(path.dirname(filepath), { recursive: true });
   await writeFile(filepath, buffer);
 
-  return NextResponse.json({ path: `/uploads/${filename}` });
+  return NextResponse.json({ path: `/api/uploads/${filename}` });
 }

@@ -131,7 +131,7 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 
 ### Avec Docker
 
-1Run le container :
+1. Run le container :
 
 ```bash
 docker compose up -d

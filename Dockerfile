@@ -9,4 +9,4 @@ ENV NEXTAUTH_SECRET=your_super_secret_key_here_change_in_production
 RUN npx prisma generate
 RUN pnpm run build
 EXPOSE 3000
-CMD ["sh", "-c", "mkdir -p /app/prisma/data && npx prisma db push && pnpm start"]
+CMD ["sh", "-c", "mkdir -p /app/prisma/data && mkdir -p /app/uploads && npx prisma db push && pnpm start"]

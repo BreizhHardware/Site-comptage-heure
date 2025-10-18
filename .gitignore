@@ -54,6 +54,7 @@ prisma/dev.db
 
 uploads/
 uploads/*
+!app/api/uploads
 
 data/
 data/*
