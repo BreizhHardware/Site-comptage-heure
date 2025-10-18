@@ -21,3 +21,6 @@ jobs:
       - run: npx prisma db push
       - run: node scripts/seed-test.js
       - run: pnpm ci:run
+        env:
+          NEXTAUTH_SECRET: test_secret_key_for_ci
+          NEXTAUTH_URL: http://localhost:3000
