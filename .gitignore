@@ -51,3 +51,9 @@ prisma/dev.db
 .vscode/
 .vscode/*
 .vscode
+
+uploads/
+uploads/*
+
+data/
+data/*

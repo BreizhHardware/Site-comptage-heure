@@ -25,6 +25,9 @@ export async function GET() {
         status: true,
         userId: true,
         user: { select: { email: true, firstName: true, lastName: true } },
+        validatedBy: {
+          select: { firstName: true, lastName: true, email: true },
+        },
       },
     });
   } else if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
@@ -38,6 +41,9 @@ export async function GET() {
         userId: true,
         user: {
           select: { email: true, firstName: true, lastName: true, role: true },
+        },
+        validatedBy: {
+          select: { firstName: true, lastName: true, email: true },
         },
       },
     });

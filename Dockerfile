@@ -7,7 +7,6 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 ENV NEXTAUTH_SECRET=your_super_secret_key_here_change_in_production
 RUN npx prisma generate
-RUN npx prisma db push
 RUN pnpm run build
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["sh", "-c", "mkdir -p /app/prisma/data && npx prisma db push && pnpm start"]

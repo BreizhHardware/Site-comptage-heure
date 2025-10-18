@@ -27,7 +27,7 @@ export async function PUT(
     where: { id },
     data: {
       status,
-      validatedBy: session.user.id,
+      validatedById: session.user.id,
     },
   });
 

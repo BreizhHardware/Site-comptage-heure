@@ -31,6 +31,7 @@ import {
 import { toast } from 'sonner';
 import { DatePicker } from '../../components/ui/date-picker';
 import { format } from 'date-fns';
+import { useSettings } from '../../context/SettingsContext';
 
 interface Hour {
   id: string;
@@ -40,11 +41,20 @@ interface Hour {
   status: string;
   userId: string;
   user: { email: string; firstName?: string; lastName?: string; role: string };
+  validatedBy?: { firstName?: string; lastName?: string; email: string };
 }
 
 interface Settings {
   name: string;
   logo: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  role: string;
 }
 
 export default function AdminPage() {
@@ -74,6 +84,17 @@ export default function AdminPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [forceDelete, setForceDelete] = useState(false);
   const [showForceModal, setShowForceModal] = useState(false);
+  const [selectedUserForReset, setSelectedUserForReset] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [newPasswordForReset, setNewPasswordForReset] = useState('');
+  const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmResetPassword, setConfirmResetPassword] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [confirmPasswordChange, setConfirmPasswordChange] = useState(false);
+  const { refetchSettings } = useSettings();
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -87,6 +108,12 @@ export default function AdminPage() {
     fetchHours();
     fetchSettings();
   }, [session, status, router]);
+
+  useEffect(() => {
+    if (session?.user?.role === 'SUPER_ADMIN') {
+      fetchUsers();
+    }
+  }, [session]);
 
   const fetchHours = async () => {
     const res = await fetch('/api/hours');
@@ -104,6 +131,14 @@ export default function AdminPage() {
     }
   };
 
+  const fetchUsers = async () => {
+    const res = await fetch('/api/users');
+    if (res.ok) {
+      const data = await res.json();
+      setUsers(data);
+    }
+  };
+
   const handleValidate = async (id: string, status: string) => {
     await fetch(`/api/hours/${id}`, {
       method: 'PUT',
@@ -111,6 +146,7 @@ export default function AdminPage() {
       body: JSON.stringify({ status }),
     });
     fetchHours();
+    toast.success(`Heure ${status === 'VALIDATED' ? 'validée' : 'rejetée'}`);
   };
 
   const handleUpdateSettings = async (e: React.FormEvent) => {
@@ -131,13 +167,19 @@ export default function AdminPage() {
         return;
       }
     }
-    await fetch('/api/settings', {
+    const res = await fetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: settings.name, logo: logoPath }),
     });
-    setLogoFile(null);
-    fetchSettings();
+    if (res.ok) {
+      setLogoFile(null);
+      fetchSettings();
+      refetchSettings();
+      toast.success('Paramètres mis à jour');
+    } else {
+      toast.error('Erreur lors de la mise à jour des paramètres');
+    }
   };
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -186,6 +228,9 @@ export default function AdminPage() {
       setMinutesInput('');
       setReason('');
       fetchHours();
+      toast.success('Heure ajoutée avec succès');
+    } else {
+      toast.error("Erreur lors de l'ajout de l'heure");
     }
   };
 
@@ -196,36 +241,23 @@ export default function AdminPage() {
       method: 'DELETE',
     });
     fetchHours();
+    toast.success('Heure supprimée');
   };
 
-  const userDisplayNames = hours.reduce(
-    (acc, hour) => {
-      const name =
-        `${hour.user.firstName || ''} ${hour.user.lastName || ''}`.trim() ||
-        hour.user.email;
-      acc[hour.user.email] = name;
+  const userMap = users.reduce(
+    (acc, user) => {
+      const name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+      acc[user.id] = { name, email: user.email, role: user.role };
       return acc;
     },
-    {} as Record<string, string>,
+    {} as Record<string, { name: string; email: string; role: string }>,
   );
 
-  const userMap = {} as Record<
-    string,
-    { name: string; email: string; role: string }
-  >;
-  hours.forEach((hour) => {
-    userMap[hour.userId] = {
-      name: userDisplayNames[hour.user.email],
-      email: hour.user.email,
-      role: hour.user.role,
-    };
-  });
-
-  const userTotals = hours.reduce(
-    (acc, hour) => {
-      if (hour.status === 'VALIDATED') {
-        acc[hour.userId] = (acc[hour.userId] || 0) + hour.duration;
-      }
+  const userTotals = users.reduce(
+    (acc, user) => {
+      acc[user.id] = hours
+        .filter(h => h.userId === user.id && h.status === 'VALIDATED')
+        .reduce((sum, h) => sum + h.duration, 0);
       return acc;
     },
     {} as Record<string, number>,
@@ -270,12 +302,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (changeNewPassword !== confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
-      return;
-    }
+  const handleConfirmChangePassword = async () => {
     const res = await fetch('/api/auth/change-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -286,9 +313,42 @@ export default function AdminPage() {
       setCurrentPassword('');
       setChangeNewPassword('');
       setConfirmPassword('');
+      setConfirmPasswordChange(false);
     } else {
       const data = await res.json();
       toast.error(data.error || 'Erreur lors du changement de mot de passe');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (changeNewPassword !== confirmPassword) {
+      toast.error('Les mots de passe ne correspondent pas');
+      return;
+    }
+    await handleConfirmChangePassword();
+  };
+
+  const handleResetPassword = () => {
+    setConfirmResetPassword(true);
+  };
+
+  const handleConfirmResetPassword = async () => {
+    if (!selectedUserForReset || !newPasswordForReset) return;
+    const res = await fetch(`/api/users/${selectedUserForReset.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: newPasswordForReset }),
+    });
+    if (res.ok) {
+      setResetPasswordDialog(false);
+      setConfirmResetPassword(false);
+      setSelectedUserForReset(null);
+      setNewPasswordForReset('');
+      toast.success('Mot de passe réinitialisé');
+    } else {
+      const data = await res.json();
+      toast.error(data.error || 'Erreur lors de la réinitialisation');
     }
   };
 
@@ -382,8 +442,17 @@ export default function AdminPage() {
                   </TableCell>
                   <TableCell>{hour.duration} min</TableCell>
                   <TableCell>{hour.reason}</TableCell>
-                  <TableCell>{hour.status}</TableCell>
-                  <TableCell>{userDisplayNames[hour.user.email]}</TableCell>
+                  <TableCell>
+                    {hour.status === 'VALIDATED' && hour.validatedBy
+                      ? `Validé par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
+                      : hour.status === 'REJECTED' && hour.validatedBy
+                      ? `Rejeté par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
+                      : hour.status === 'PENDING'
+                      ? 'En attente'
+                      : hour.status
+                    }
+                  </TableCell>
+                  <TableCell>{userMap[hour.userId]?.name}</TableCell>
                   <TableCell>
                     {hour.status === 'VALIDATED' ||
                     hour.status === 'REJECTED' ? (
@@ -440,19 +509,34 @@ export default function AdminPage() {
                       {userMap[userId]?.role === 'SUPER_ADMIN' ? (
                         'Super Admin'
                       ) : (
-                        <Button
-                          onClick={() => {
-                            setSelectedUser({
-                              id: userId,
-                              name: userMap[userId]?.name,
-                            });
-                            setForceDelete(false);
-                            setDialogOpen(true);
-                          }}
-                          variant="destructive"
-                        >
-                          Supprimer
-                        </Button>
+                        <>
+                          <Button
+                            onClick={() => {
+                              setSelectedUser({
+                                id: userId,
+                                name: userMap[userId]?.name,
+                              });
+                              setForceDelete(false);
+                              setDialogOpen(true);
+                            }}
+                            variant="destructive"
+                            className="mr-2"
+                          >
+                            Supprimer
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setSelectedUserForReset({
+                                id: userId,
+                                name: userMap[userId]?.name,
+                              });
+                              setResetPasswordDialog(true);
+                            }}
+                            variant="outline"
+                          >
+                            Réinitialiser le mot de passe
+                          </Button>
+                        </>
                       )}
                     </TableCell>
                   </TableRow>
@@ -558,7 +642,7 @@ export default function AdminPage() {
                   className="w-full p-2 border rounded bg-white text-black dark:bg-stone-800 dark:text-white dark:border-stone-600"
                 >
                   <option value="MEMBER">Membre</option>
-                  <option value="ADMIN">Admin</option>
+                  <option value="ADMIN">Bureau</option>
                 </select>
               </div>
               <Button type="submit">Créer</Button>
@@ -640,6 +724,50 @@ export default function AdminPage() {
               <Button onClick={handleForceDelete} variant="destructive">
                 Supprimer
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      {selectedUserForReset && (
+        <Dialog open={resetPasswordDialog} onOpenChange={setResetPasswordDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              Entrez un nouveau mot de passe pour {selectedUserForReset.name}.
+            </DialogDescription>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="newPasswordReset">Nouveau mot de passe</Label>
+                <Input
+                  id="newPasswordReset"
+                  type="password"
+                  value={newPasswordForReset}
+                  onChange={(e) => setNewPasswordForReset(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setResetPasswordDialog(false)}>Annuler</Button>
+              <Button onClick={handleResetPassword}>Réinitialiser</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+      {selectedUserForReset && confirmResetPassword && (
+        <Dialog open={confirmResetPassword} onOpenChange={setConfirmResetPassword}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmation de réinitialisation</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir réinitialiser le mot de passe de {selectedUserForReset.name} ?
+            </DialogDescription>
+            <DialogFooter>
+              <Button onClick={() => setConfirmResetPassword(false)}>Annuler</Button>
+              <Button onClick={handleConfirmResetPassword}>Confirmer</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
