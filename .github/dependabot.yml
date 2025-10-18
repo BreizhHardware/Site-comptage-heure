@@ -9,13 +9,16 @@ updates:
     directory: '/.github/workflow' # Location of package manifests
     schedule:
       interval: 'weekly'
+    target-branch: 'dev'
 
   - package-ecosystem: 'npm'
     directory: '/' # Location of package manifests
     schedule:
       interval: 'weekly'
+    target-branch: 'dev'
 
   - package-ecosystem: 'docker'
     directory: '/' # Location of Dockerfile
     schedule:
       interval: 'weekly'
+    target-branch: 'dev'
