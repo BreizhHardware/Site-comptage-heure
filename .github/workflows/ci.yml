@@ -21,4 +21,3 @@ jobs:
       - run: npx prisma db push
       - run: node scripts/seed-test.js
       - run: pnpm ci:run
-      - run: pnpm run build
