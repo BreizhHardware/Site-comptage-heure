@@ -10,7 +10,7 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:e2e": "cypress run",
-    "ci:run": "pnpm build && start-server-and-test start http://localhost:3000 test:e2e"
+    "ci:run": "pnpm build && npx start-server-and-test start http://localhost:3000 test:e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
