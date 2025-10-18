@@ -1,29 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from './ui/button';
-
-interface Settings {
-  name: string;
-  logo: string;
-}
+import { useSettings } from '../context/SettingsContext';
 
 export default function Header() {
   const { data: session } = useSession();
-  const [settings, setSettings] = useState<Settings>({ name: '', logo: '' });
-
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  const fetchSettings = async () => {
-    const res = await fetch('/api/settings');
-    if (res.ok) {
-      const data = await res.json();
-      setSettings(data);
-    }
-  };
+  const { settings } = useSettings();
 
   return (
     <header className="bg-white dark:bg-stone-950 p-4">
@@ -39,7 +22,12 @@ export default function Header() {
         {session && (
           <div className="flex items-center space-x-4">
             <span className="text-gray-900 dark:text-white">
-              {session.user.email} ({session.user.role})
+              {session.user.email} ({
+                session.user.role === 'MEMBER' ? 'Membre' :
+                session.user.role === 'ADMIN' ? 'Bureau' :
+                session.user.role === 'SUPER_ADMIN' ? 'Gestionnaire' :
+                session.user.role
+              })
             </span>
             <Button onClick={() => signOut()} variant="destructive">
               Déconnexion

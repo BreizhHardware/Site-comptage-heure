@@ -25,12 +25,13 @@ import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 interface Hour {
-  id: number;
+  id: string;
   date: string;
   duration: number;
   reason: string;
   status: string;
   user: { email: string };
+  validatedBy?: { firstName?: string; lastName?: string; email: string };
 }
 
 export default function DashboardPage() {
@@ -94,7 +95,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleValidate = async (id: number, status: string) => {
+  const handleValidate = async (id: string, status: string) => {
     await fetch(`/api/hours/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -241,7 +242,14 @@ export default function DashboardPage() {
                   </TableCell>
                   <TableCell>{hour.duration} min</TableCell>
                   <TableCell>{hour.reason}</TableCell>
-                  <TableCell>{hour.status}</TableCell>
+                  <TableCell>{hour.status === 'VALIDATED' && hour.validatedBy
+                      ? `Validé par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
+                      : hour.status === 'REJECTED' && hour.validatedBy
+                          ? `Rejeté par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
+                          : hour.status === 'PENDING'
+                              ? 'En attente'
+                              : hour.status
+                  }</TableCell>
                   {isAdmin && <TableCell>{hour.user.email}</TableCell>}
                   {isAdmin && (
                     <TableCell>
