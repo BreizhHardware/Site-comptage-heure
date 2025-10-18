@@ -246,7 +246,8 @@ export default function AdminPage() {
 
   const userMap = users.reduce(
     (acc, user) => {
-      const name = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
+      const name =
+        `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email;
       acc[user.id] = { name, email: user.email, role: user.role };
       return acc;
     },
@@ -256,7 +257,7 @@ export default function AdminPage() {
   const userTotals = users.reduce(
     (acc, user) => {
       acc[user.id] = hours
-        .filter(h => h.userId === user.id && h.status === 'VALIDATED')
+        .filter((h) => h.userId === user.id && h.status === 'VALIDATED')
         .reduce((sum, h) => sum + h.duration, 0);
       return acc;
     },
@@ -444,13 +445,14 @@ export default function AdminPage() {
                   <TableCell>{hour.reason}</TableCell>
                   <TableCell>
                     {hour.status === 'VALIDATED' && hour.validatedBy
-                      ? `Validé par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
+                      ? `Validé par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() ||
+                        hour.validatedBy.email
                       : hour.status === 'REJECTED' && hour.validatedBy
-                      ? `Rejeté par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() || hour.validatedBy.email
-                      : hour.status === 'PENDING'
-                      ? 'En attente'
-                      : hour.status
-                    }
+                        ? `Rejeté par ${hour.validatedBy.firstName || ''} ${hour.validatedBy.lastName || ''}`.trim() ||
+                          hour.validatedBy.email
+                        : hour.status === 'PENDING'
+                          ? 'En attente'
+                          : hour.status}
                   </TableCell>
                   <TableCell>{userMap[hour.userId]?.name}</TableCell>
                   <TableCell>
@@ -729,7 +731,10 @@ export default function AdminPage() {
         </Dialog>
       )}
       {selectedUserForReset && (
-        <Dialog open={resetPasswordDialog} onOpenChange={setResetPasswordDialog}>
+        <Dialog
+          open={resetPasswordDialog}
+          onOpenChange={setResetPasswordDialog}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
@@ -750,23 +755,31 @@ export default function AdminPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button onClick={() => setResetPasswordDialog(false)}>Annuler</Button>
+              <Button onClick={() => setResetPasswordDialog(false)}>
+                Annuler
+              </Button>
               <Button onClick={handleResetPassword}>Réinitialiser</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
       {selectedUserForReset && confirmResetPassword && (
-        <Dialog open={confirmResetPassword} onOpenChange={setConfirmResetPassword}>
+        <Dialog
+          open={confirmResetPassword}
+          onOpenChange={setConfirmResetPassword}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Confirmation de réinitialisation</DialogTitle>
             </DialogHeader>
             <DialogDescription>
-              Êtes-vous sûr de vouloir réinitialiser le mot de passe de {selectedUserForReset.name} ?
+              Êtes-vous sûr de vouloir réinitialiser le mot de passe de{' '}
+              {selectedUserForReset.name} ?
             </DialogDescription>
             <DialogFooter>
-              <Button onClick={() => setConfirmResetPassword(false)}>Annuler</Button>
+              <Button onClick={() => setConfirmResetPassword(false)}>
+                Annuler
+              </Button>
               <Button onClick={handleConfirmResetPassword}>Confirmer</Button>
             </DialogFooter>
           </DialogContent>

@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 
 interface Settings {
   name: string;
@@ -12,7 +18,9 @@ interface SettingsContextType {
   refetchSettings: () => void;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined,
+);
 
 export function useSettings() {
   const context = useContext(SettingsContext);
@@ -38,7 +46,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SettingsContext.Provider value={{ settings, refetchSettings: fetchSettings }}>
+    <SettingsContext.Provider
+      value={{ settings, refetchSettings: fetchSettings }}
+    >
       {children}
     </SettingsContext.Provider>
   );
