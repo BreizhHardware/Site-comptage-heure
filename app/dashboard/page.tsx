@@ -102,6 +102,7 @@ export default function DashboardPage() {
       body: JSON.stringify({ status }),
     });
     fetchHours();
+    toast.success(`Heure ${status === 'VALIDATED' ? 'validée' : 'rejetée'}`);
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {

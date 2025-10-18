@@ -146,6 +146,7 @@ export default function AdminPage() {
       body: JSON.stringify({ status }),
     });
     fetchHours();
+    toast.success(`Heure ${status === 'VALIDATED' ? 'validée' : 'rejetée'}`);
   };
 
   const handleUpdateSettings = async (e: React.FormEvent) => {
@@ -227,6 +228,9 @@ export default function AdminPage() {
       setMinutesInput('');
       setReason('');
       fetchHours();
+      toast.success('Heure ajoutée avec succès');
+    } else {
+      toast.error("Erreur lors de l'ajout de l'heure");
     }
   };
 
