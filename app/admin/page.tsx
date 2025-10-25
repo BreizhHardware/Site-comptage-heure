@@ -110,7 +110,10 @@ export default function AdminPage() {
   }, [session, status, router]);
 
   useEffect(() => {
-    if (session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN') {
+    if (
+      session?.user?.role === 'SUPER_ADMIN' ||
+      session?.user?.role === 'ADMIN'
+    ) {
       fetchUsers();
     }
   }, [session]);
@@ -541,8 +544,12 @@ export default function AdminPage() {
                             </Button>
                           </>
                         )
+                      ) : userMap[userId]?.role === 'SUPER_ADMIN' ? (
+                        'Gestionnaire'
+                      ) : userMap[userId]?.role === 'ADMIN' ? (
+                        'Bureau'
                       ) : (
-                        userMap[userId]?.role === 'SUPER_ADMIN' ? 'Gestionnaire' : userMap[userId]?.role === 'ADMIN' ? 'Bureau' : 'Membre'
+                        'Membre'
                       )}
                     </TableCell>
                   </TableRow>
