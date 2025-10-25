@@ -110,7 +110,10 @@ export default function AdminPage() {
   }, [session, status, router]);
 
   useEffect(() => {
-    if (session?.user?.role === 'SUPER_ADMIN') {
+    if (
+      session?.user?.role === 'SUPER_ADMIN' ||
+      session?.user?.role === 'ADMIN'
+    ) {
       fetchUsers();
     }
   }, [session]);
@@ -508,37 +511,45 @@ export default function AdminPage() {
                     <TableCell>{userMap[userId]?.name}</TableCell>
                     <TableCell>{formatHours(total)}</TableCell>
                     <TableCell>
-                      {userMap[userId]?.role === 'SUPER_ADMIN' ? (
-                        'Super Admin'
+                      {isSuperAdmin ? (
+                        userMap[userId]?.role === 'SUPER_ADMIN' ? (
+                          'Super Admin'
+                        ) : (
+                          <>
+                            <Button
+                              onClick={() => {
+                                setSelectedUser({
+                                  id: userId,
+                                  name: userMap[userId]?.name,
+                                });
+                                setForceDelete(false);
+                                setDialogOpen(true);
+                              }}
+                              variant="destructive"
+                              className="mr-2"
+                            >
+                              Supprimer
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setSelectedUserForReset({
+                                  id: userId,
+                                  name: userMap[userId]?.name,
+                                });
+                                setResetPasswordDialog(true);
+                              }}
+                              variant="outline"
+                            >
+                              Réinitialiser le mot de passe
+                            </Button>
+                          </>
+                        )
+                      ) : userMap[userId]?.role === 'SUPER_ADMIN' ? (
+                        'Gestionnaire'
+                      ) : userMap[userId]?.role === 'ADMIN' ? (
+                        'Bureau'
                       ) : (
-                        <>
-                          <Button
-                            onClick={() => {
-                              setSelectedUser({
-                                id: userId,
-                                name: userMap[userId]?.name,
-                              });
-                              setForceDelete(false);
-                              setDialogOpen(true);
-                            }}
-                            variant="destructive"
-                            className="mr-2"
-                          >
-                            Supprimer
-                          </Button>
-                          <Button
-                            onClick={() => {
-                              setSelectedUserForReset({
-                                id: userId,
-                                name: userMap[userId]?.name,
-                              });
-                              setResetPasswordDialog(true);
-                            }}
-                            variant="outline"
-                          >
-                            Réinitialiser le mot de passe
-                          </Button>
-                        </>
+                        'Membre'
                       )}
                     </TableCell>
                   </TableRow>
