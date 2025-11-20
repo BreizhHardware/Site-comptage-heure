@@ -6,16 +6,19 @@ declare module 'next-auth' {
       id: string;
       email: string;
       role: string;
+      passwordResetRequired?: boolean;
     };
   }
 
   interface User {
     role: string;
+    passwordResetRequired?: boolean;
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     role: string;
+    passwordResetRequired?: boolean;
   }
 }

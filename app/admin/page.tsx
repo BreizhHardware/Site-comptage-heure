@@ -373,7 +373,12 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Administration</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Administration</h1>
+        <Button onClick={() => router.push('/admin/import-users')}>
+          Importer des utilisateurs
+        </Button>
+      </div>
       <Card className="mb-4">
         <CardHeader>
           <CardTitle>Ajouter des heures</CardTitle>

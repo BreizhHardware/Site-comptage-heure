@@ -10,6 +10,7 @@ datasource db {
   url      = "file:./data/dev.db"
 }
 
+
 model User {
   id       String   @id
   email    String   @unique
@@ -19,6 +20,7 @@ model User {
   validatedHours Hour[] @relation("ValidatedHours")
   firstName String?
   lastName String?
+  passwordResetRequired Boolean @default(false)
 }
 
 model Hour {
