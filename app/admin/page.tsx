@@ -28,6 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../../components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
+import { Checkbox } from '../../components/ui/checkbox';
 import { toast } from 'sonner';
 import { DatePicker } from '../../components/ui/date-picker';
 import { format } from 'date-fns';
@@ -40,6 +48,7 @@ interface Hour {
   reason: string;
   status: string;
   userId: string;
+  createdAt?: string;
   user: { email: string; firstName?: string; lastName?: string; role: string };
   validatedBy?: { firstName?: string; lastName?: string; email: string };
 }
@@ -94,6 +103,10 @@ export default function AdminPage() {
   const [confirmResetPassword, setConfirmResetPassword] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [confirmPasswordChange, setConfirmPasswordChange] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<'date' | 'createdAt'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [showPendingFirst, setShowPendingFirst] = useState(false);
   const { refetchSettings } = useSettings();
 
   useEffect(() => {
@@ -223,6 +236,7 @@ export default function AdminPage() {
         date: dateString,
         duration: totalMinutes,
         reason,
+        userIds: selectedUserIds.length > 0 ? selectedUserIds : undefined,
       }),
     });
     if (res.ok) {
@@ -230,6 +244,7 @@ export default function AdminPage() {
       setHoursInput('');
       setMinutesInput('');
       setReason('');
+      setSelectedUserIds([]);
       fetchHours();
       toast.success('Heure ajoutée avec succès');
     } else {
@@ -360,9 +375,27 @@ export default function AdminPage() {
 
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
 
-  const sortedHours = hours.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
+  const sortedHours = [...hours].sort((a, b) => {
+    if (showPendingFirst) {
+      if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
+      if (a.status !== 'PENDING' && b.status === 'PENDING') return 1;
+    }
+
+    let dateA, dateB;
+    if (sortBy === 'createdAt') {
+      dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    } else {
+      dateA = new Date(a.date).getTime();
+      dateB = new Date(b.date).getTime();
+    }
+
+    if (sortOrder === 'asc') {
+      return dateA - dateB;
+    } else {
+      return dateB - dateA;
+    }
+  });
   const displayedHours = showAll ? sortedHours : sortedHours.slice(0, 10);
 
   const formatHours = (minutes: number) => {
@@ -373,13 +406,48 @@ export default function AdminPage() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Administration</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold">Administration</h1>
+        <Button onClick={() => router.push('/admin/import-users')}>
+          Importer des utilisateurs
+        </Button>
+      </div>
       <Card className="mb-4">
         <CardHeader>
           <CardTitle>Ajouter des heures</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddHour} className="space-y-4">
+            <div>
+              <Label className="mb-2 block">
+                Utilisateurs (laisser vide pour vous-même)
+              </Label>
+              <div className="h-40 overflow-y-auto border rounded p-2 space-y-2 bg-white dark:bg-stone-900">
+                {users.map((user) => (
+                  <div key={user.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`user-${user.id}`}
+                      checked={selectedUserIds.includes(user.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedUserIds([...selectedUserIds, user.id]);
+                        } else {
+                          setSelectedUserIds(
+                            selectedUserIds.filter((id) => id !== user.id),
+                          );
+                        }
+                      }}
+                    />
+                    <Label
+                      htmlFor={`user-${user.id}`}
+                      className="cursor-pointer font-normal"
+                    >
+                      {user.firstName} {user.lastName} ({user.email})
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div>
               <Label htmlFor="date">Date</Label>
               <DatePicker date={date} setDate={setDate} />
@@ -427,6 +495,59 @@ export default function AdminPage() {
           <CardTitle>Gestion des heures</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex flex-wrap gap-4 mb-4 items-end">
+            <div className="w-[200px]">
+              <Label htmlFor="sortBy" className="mb-2 block">
+                Trier par
+              </Label>
+              <Select
+                value={sortBy}
+                onValueChange={(value) =>
+                  setSortBy(value as 'date' | 'createdAt')
+                }
+              >
+                <SelectTrigger id="sortBy">
+                  <SelectValue placeholder="Trier par" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">Date effective</SelectItem>
+                  <SelectItem value="createdAt">Date d'ajout</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-[200px]">
+              <Label htmlFor="sortOrder" className="mb-2 block">
+                Ordre
+              </Label>
+              <Select
+                value={sortOrder}
+                onValueChange={(value) => setSortOrder(value as 'asc' | 'desc')}
+              >
+                <SelectTrigger id="sortOrder">
+                  <SelectValue placeholder="Ordre" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Récent d'abord</SelectItem>
+                  <SelectItem value="asc">Ancien d'abord</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2 pb-2">
+              <Checkbox
+                id="showPendingFirst"
+                checked={showPendingFirst}
+                onCheckedChange={(checked) =>
+                  setShowPendingFirst(checked as boolean)
+                }
+              />
+              <Label
+                htmlFor="showPendingFirst"
+                className="cursor-pointer font-normal"
+              >
+                Afficher les "En attente" en premier
+              </Label>
+            </div>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -647,16 +768,18 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="newRole">Rôle</Label>
-                <select
-                  id="newRole"
-                  value={newRole}
-                  onChange={(e) => setNewRole(e.target.value)}
-                  className="w-full p-2 border rounded bg-white text-black dark:bg-stone-800 dark:text-white dark:border-stone-600"
-                >
-                  <option value="MEMBER">Membre</option>
-                  <option value="ADMIN">Bureau</option>
-                </select>
+                <Label htmlFor="newRole" className="mb-2 block">
+                  Rôle
+                </Label>
+                <Select value={newRole} onValueChange={setNewRole}>
+                  <SelectTrigger id="newRole">
+                    <SelectValue placeholder="Rôle" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MEMBER">Membre</SelectItem>
+                    <SelectItem value="ADMIN">Bureau</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button type="submit">Créer</Button>
             </form>
@@ -702,11 +825,10 @@ export default function AdminPage() {
             <DialogDescription>
               Êtes-vous sûr de vouloir supprimer cet utilisateur ?
               <div className="flex items-center space-x-2 mt-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="force"
                   checked={forceDelete}
-                  onChange={(e) => setForceDelete(e.target.checked)}
+                  onCheckedChange={(checked) => setForceDelete(checked as boolean)}
                 />
                 <Label htmlFor="force">
                   Forcer la suppression même si l'utilisateur a des heures

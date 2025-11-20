@@ -49,10 +49,10 @@ Une application web moderne pour la gestion des heures travaillées dans un club
 
    ```bash
    # Appliquer le schéma Prisma
-   npx prisma db push
+   pnpx prisma db push
 
    # (Optionnel) Générer le client Prisma
-   npx prisma generate
+   pnpx prisma generate
    ```
 
 4. **Variables d'environnement**

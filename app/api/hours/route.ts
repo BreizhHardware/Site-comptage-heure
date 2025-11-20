@@ -24,6 +24,7 @@ export async function GET() {
         reason: true,
         status: true,
         userId: true,
+        createdAt: true,
         user: { select: { email: true, firstName: true, lastName: true } },
         validatedBy: {
           select: { firstName: true, lastName: true, email: true },
@@ -39,6 +40,7 @@ export async function GET() {
         reason: true,
         status: true,
         userId: true,
+        createdAt: true,
         user: {
           select: { email: true, firstName: true, lastName: true, role: true },
         },
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Accès refusé' }, { status: 403 });
   }
 
-  const { date, duration, reason } = await request.json();
+  const { date, duration, reason, userIds } = await request.json();
 
   if (!date || !duration || !reason) {
     return NextResponse.json(
@@ -74,17 +76,39 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const userId = session.user.id;
+  let targetUserIds = [session.user.id];
+  let status = 'PENDING';
+  let validatedById = undefined;
 
-  const hour = await prisma.hour.create({
-    data: {
-      id: uuidv4(),
-      date: new Date(date),
-      duration,
-      reason,
-      userId,
-    },
-  });
+  if (userIds && Array.isArray(userIds) && userIds.length > 0) {
+    if (session.user.role === 'ADMIN' || session.user.role === 'SUPER_ADMIN') {
+      targetUserIds = userIds;
+      status = 'VALIDATED';
+      validatedById = session.user.id;
+    } else {
+      return NextResponse.json(
+        { error: "Non autorisé à ajouter des heures pour d'autres utilisateurs" },
+        { status: 403 },
+      );
+    }
+  }
 
-  return NextResponse.json(hour);
+  const createdHours = [];
+
+  for (const uid of targetUserIds) {
+    const hour = await prisma.hour.create({
+      data: {
+        id: uuidv4(),
+        date: new Date(date),
+        duration,
+        reason,
+        userId: uid,
+        status: status as any,
+        validatedById,
+      },
+    });
+    createdHours.push(hour);
+  }
+
+  return NextResponse.json(createdHours);
 }

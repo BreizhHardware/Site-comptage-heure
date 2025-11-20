@@ -3,6 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from './ui/button';
 import { useSettings } from '../context/SettingsContext';
+import { ModeToggle } from './mode-toggle';
 
 export default function Header() {
   const { data: session } = useSession();
@@ -19,24 +20,27 @@ export default function Header() {
             {settings.name || 'Club Scolaire'}
           </h1>
         </div>
-        {session && (
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-900 dark:text-white">
-              {session.user.email} (
-              {session.user.role === 'MEMBER'
-                ? 'Membre'
-                : session.user.role === 'ADMIN'
-                  ? 'Bureau'
-                  : session.user.role === 'SUPER_ADMIN'
-                    ? 'Gestionnaire'
-                    : session.user.role}
-              )
-            </span>
-            <Button onClick={() => signOut()} variant="destructive">
-              Déconnexion
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center space-x-4">
+          <ModeToggle />
+          {session && (
+            <>
+              <span className="text-gray-900 dark:text-white">
+                {session.user.email} (
+                {session.user.role === 'MEMBER'
+                  ? 'Membre'
+                  : session.user.role === 'ADMIN'
+                    ? 'Bureau'
+                    : session.user.role === 'SUPER_ADMIN'
+                      ? 'Gestionnaire'
+                      : session.user.role}
+                )
+              </span>
+              <Button onClick={() => signOut()} variant="destructive">
+                Déconnexion
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );
