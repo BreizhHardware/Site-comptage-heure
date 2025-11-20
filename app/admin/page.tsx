@@ -94,6 +94,7 @@ export default function AdminPage() {
   const [confirmResetPassword, setConfirmResetPassword] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [confirmPasswordChange, setConfirmPasswordChange] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const { refetchSettings } = useSettings();
 
   useEffect(() => {
@@ -223,6 +224,7 @@ export default function AdminPage() {
         date: dateString,
         duration: totalMinutes,
         reason,
+        userIds: selectedUserIds.length > 0 ? selectedUserIds : undefined,
       }),
     });
     if (res.ok) {
@@ -230,6 +232,7 @@ export default function AdminPage() {
       setHoursInput('');
       setMinutesInput('');
       setReason('');
+      setSelectedUserIds([]);
       fetchHours();
       toast.success('Heure ajoutée avec succès');
     } else {
@@ -385,6 +388,38 @@ export default function AdminPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAddHour} className="space-y-4">
+            <div>
+              <Label className="mb-2 block">
+                Utilisateurs (laisser vide pour vous-même)
+              </Label>
+              <div className="h-40 overflow-y-auto border rounded p-2 space-y-2 bg-white dark:bg-stone-900">
+                {users.map((user) => (
+                  <div key={user.id} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id={`user-${user.id}`}
+                      checked={selectedUserIds.includes(user.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedUserIds([...selectedUserIds, user.id]);
+                        } else {
+                          setSelectedUserIds(
+                            selectedUserIds.filter((id) => id !== user.id),
+                          );
+                        }
+                      }}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <Label
+                      htmlFor={`user-${user.id}`}
+                      className="cursor-pointer font-normal"
+                    >
+                      {user.firstName} {user.lastName} ({user.email})
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div>
               <Label htmlFor="date">Date</Label>
               <DatePicker date={date} setDate={setDate} />
