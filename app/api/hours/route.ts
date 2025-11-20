@@ -24,6 +24,7 @@ export async function GET() {
         reason: true,
         status: true,
         userId: true,
+        createdAt: true,
         user: { select: { email: true, firstName: true, lastName: true } },
         validatedBy: {
           select: { firstName: true, lastName: true, email: true },
@@ -39,6 +40,7 @@ export async function GET() {
         reason: true,
         status: true,
         userId: true,
+        createdAt: true,
         user: {
           select: { email: true, firstName: true, lastName: true, role: true },
         },
