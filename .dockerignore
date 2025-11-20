@@ -41,4 +41,4 @@ prisma/dev.db
 INITIAL_SETUP.md
 API_DOCS.md
 INDICATIONS_POUR_LLMS.md
-
+scripts/seed-test.js
