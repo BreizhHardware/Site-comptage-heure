@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id.toString(),
           email: user.email,
           role: user.role,
+          passwordResetRequired: user.passwordResetRequired,
         };
       },
     }),
@@ -40,9 +41,15 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
+        token.passwordResetRequired = user.passwordResetRequired;
+      }
+      if (trigger === 'update' && session) {
+        if (typeof session.passwordResetRequired === 'boolean') {
+          token.passwordResetRequired = session.passwordResetRequired;
+        }
       }
       return token;
     },
@@ -50,6 +57,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.sub!;
         session.user.role = token.role as string;
+        session.user.passwordResetRequired = token.passwordResetRequired as boolean;
       }
       return session;
     },
