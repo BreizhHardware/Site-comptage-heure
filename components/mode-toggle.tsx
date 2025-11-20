@@ -4,12 +4,12 @@ import * as React from "react"
 import { Moon, Sun, Laptop } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "./ui/button"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "./ui/popover"
 
 export function ModeToggle() {
   const { setTheme, theme } = useTheme()
