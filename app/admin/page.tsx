@@ -106,7 +106,7 @@ export default function AdminPage() {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'date' | 'createdAt'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [showPendingFirst, setShowPendingFirst] = useState(false);
+  const [showPendingFirst, setShowPendingFirst] = useState(true);
   const { refetchSettings } = useSettings();
 
   useEffect(() => {
