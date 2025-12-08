@@ -1,6 +1,8 @@
 name: Security Audit
 
 on:
+  push:
+    branches: [main, dev]
   schedule:
     - cron: '0 8 * * *' 
   workflow_dispatch: 
