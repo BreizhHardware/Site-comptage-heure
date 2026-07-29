@@ -19,7 +19,7 @@ jobs:
           node-version: '24'
       - uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 11
       - run: pnpm install
       - run: npx prisma generate
       - run: npx prisma db push

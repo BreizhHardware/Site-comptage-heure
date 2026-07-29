@@ -8,3 +8,15 @@ allowBuilds:
   cypress: true
   prisma: true
   sharp: true
+
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - bcrypt
+  - cypress
+  - prisma
+  - sharp
+
+overrides:
+  '@types/react': '19.2.2'
+  '@types/react-dom': '19.2.2'
