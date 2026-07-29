@@ -1,14 +1,14 @@
 # ── Stage 1 : installation des dépendances ───────────────────────────────────
 FROM node:24-alpine AS deps
 WORKDIR /app
-RUN npm install -g pnpm
+RUN npm install -g pnpm@11
 COPY package*.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # ── Stage 2 : build ───────────────────────────────────────────────────────────
 FROM node:24-alpine AS builder
 WORKDIR /app
-RUN npm install -g pnpm
+RUN npm install -g pnpm@11
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

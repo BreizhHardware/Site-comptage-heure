@@ -2,9 +2,21 @@ packages:
   - '.'
 
 allowBuilds:
-  '@prisma/client': true
-  '@prisma/engines': true
-  bcrypt: true
-  cypress: true
-  prisma: true
-  sharp: true
+  '@prisma/client': set this to true or false
+  '@prisma/engines': set this to true or false
+  bcrypt: set this to true or false
+  cypress: set this to true or false
+  prisma: set this to true or false
+  sharp: set this to true or false
+
+onlyBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - bcrypt
+  - cypress
+  - prisma
+  - sharp
+
+overrides:
+  '@types/react': '19.2.2'
+  '@types/react-dom': '19.2.2'
