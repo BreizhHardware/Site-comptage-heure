@@ -9,3 +9,5 @@ services:
     environment:
       - NEXTAUTH_SECRET=your_secret_key
       - NEXTAUTH_URL=http://localhost:3000
+      - DATABASE_PROVIDER=sqlite
+      - DATABASE_URL=file:./data/dev.db

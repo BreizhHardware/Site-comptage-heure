@@ -19,7 +19,7 @@ Une application web moderne pour la gestion des heures travaillées dans un club
 
 - **Framework** : Next.js 15 (App Router)
 - **Langage** : TypeScript
-- **Base de données** : SQLite avec Prisma ORM
+- **Base de données** : SQLite ou PostgreSQL avec Prisma ORM
 - **Authentification** : NextAuth.js
 - **UI** : Tailwind CSS + shadcn/ui + Radix UI
 - **Gestionnaire de paquets** : pnpm
@@ -45,23 +45,34 @@ Une application web moderne pour la gestion des heures travaillées dans un club
    pnpm install
    ```
 
-3. **Configuration de la base de données**
-
-   ```bash
-   # Appliquer le schéma Prisma
-   pnpx prisma db push
-
-   # (Optionnel) Générer le client Prisma
-   pnpx prisma generate
-   ```
-
-4. **Variables d'environnement**
+3. **Variables d'environnement**
 
    Créer un fichier `.env.local` à la racine :
 
+   **Avec SQLite (défaut, recommandé pour le développement) :**
    ```env
    NEXTAUTH_SECRET=votre-secret-très-long-et-sécurisé
    NEXTAUTH_URL=http://localhost:3000
+   DATABASE_PROVIDER=sqlite
+   DATABASE_URL=file:./prisma/data/dev.db
+   ```
+
+   **Avec PostgreSQL :**
+   ```env
+   NEXTAUTH_SECRET=votre-secret-très-long-et-sécurisé
+   NEXTAUTH_URL=http://localhost:3000
+   DATABASE_PROVIDER=postgresql
+   DATABASE_URL=postgresql://utilisateur:motdepasse@localhost:5432/comptage_heures
+   ```
+
+4. **Configuration de la base de données**
+
+   ```bash
+   # Configure le schéma selon DATABASE_PROVIDER et applique les changements
+   node scripts/setup-db.js
+
+   # (Optionnel) Interface graphique pour la DB
+   npx prisma studio
    ```
 
 5. **Créer un Super Administrateur**
@@ -97,6 +108,9 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 - `pnpm build` : Build de production
 - `pnpm start` : Serveur de production
 - `pnpm format` : Formatage du code avec Prettier
+- `node scripts/setup-db.js` : Configure la DB selon `DATABASE_PROVIDER` et applique le schéma
+- `node scripts/setup-db.js --generate-only` : Met à jour le schéma et génère le client Prisma uniquement
+- `node scripts/setup-db.js --push-only` : Applique le schéma à la DB uniquement
 
 ## Structure du projet
 
@@ -114,7 +128,8 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 │   ├── auth.ts           # Configuration NextAuth
 │   ├── prisma.ts         # Client Prisma
 │   └── use-toast.ts      # Hook pour les toasts
-├── prisma/               # Schéma et migrations Prisma
+├── prisma/               # Schéma Prisma
+├── scripts/              # Scripts utilitaires
 └── public/               # Assets statiques
 ```
 
@@ -129,25 +144,45 @@ Ouvrir [http://localhost:3000](http://localhost:3000)
 
 ## Déploiement
 
-### Avec Docker
-
-1. Run le container :
+### Avec Docker — SQLite (simple)
 
 ```bash
 docker compose up -d
 ```
 
-Créer un Super Administrateur à l'intérieur du container :
+Créer un Super Administrateur :
 
 ```bash
 docker exec -it <container_id> sh
-```
-
-Puis exécuter (pensez à modifier le nom d'utilisateur et le mot de passe si nécessaire) :
-
-```bash
 node scripts/create-super-admin.js
 ```
+
+### Avec Docker — PostgreSQL
+
+Utilise le fichier `docker-compose.postgresql.yml` qui démarre un conteneur PostgreSQL et l'application ensemble :
+
+```bash
+docker compose -f docker-compose.postgresql.yml up -d
+```
+
+> L'image est construite localement avec `DATABASE_PROVIDER=postgresql`.
+> La base de données PostgreSQL est automatiquement provisionnée au démarrage.
+
+Créer un Super Administrateur :
+
+```bash
+docker exec -it <container_id> sh
+node scripts/create-super-admin.js
+```
+
+### Variables d'environnement Docker
+
+| Variable            | Description                              | Défaut                        |
+|---------------------|------------------------------------------|-------------------------------|
+| `DATABASE_PROVIDER` | `sqlite` ou `postgresql`                 | `sqlite`                      |
+| `DATABASE_URL`      | URL de connexion à la base de données    | `file:./data/dev.db` (SQLite) |
+| `NEXTAUTH_SECRET`   | Secret pour les sessions NextAuth        | *(obligatoire)*               |
+| `NEXTAUTH_URL`      | URL publique de l'application            | `http://localhost:3000`       |
 
 ## Contribution
 
