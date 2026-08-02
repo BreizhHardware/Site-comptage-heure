@@ -28,25 +28,38 @@ RUN node scripts/setup-db.js --generate-only
 
 RUN pnpm run build
 
+# ── Stage 2.5 : dépendances de production uniquement ─────────────────────────
+# Stage séparé pour obtenir un node_modules pnpm correct avec uniquement les
+# dépendances de production (Prisma inclus, Cypress et devDeps exclus).
+FROM node:24-alpine AS prod-deps
+WORKDIR /app
+RUN npm install -g pnpm@11
+COPY package*.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY prisma ./prisma
+RUN pnpm install --prod --frozen-lockfile
+# Générer le client Prisma dans le virtual store pnpm
+RUN node node_modules/prisma/build/index.js generate
+
 # ── Stage 3 : image de production allégée ─────────────────────────────────────
 FROM node:24-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Sortie standalone Next.js (serveur + node_modules minimaux)
-COPY --from=builder /app/.next/standalone ./
+# Dépendances de production (pnpm virtual store complet, .prisma inclus)
+COPY --from=prod-deps /app/node_modules ./node_modules
+
+# Serveur standalone Next.js
+COPY --from=builder /app/.next/standalone/server.js ./server.js
+COPY --from=builder /app/.next/standalone/.next ./.next
 COPY --from=builder /app/.next/static ./.next/static
+
+# Dossier public
 COPY --from=builder /app/public ./public
 
 # Schéma Prisma et scripts utilitaires (setup, create-super-admin…)
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts
-
-# Client Prisma généré + CLI (nécessaires pour db push au démarrage)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
 EXPOSE 3000
 ENV PORT=3000
